@@ -15,12 +15,16 @@ generoAnime('bleach',['shounen', 'sobrenatural']).
 generoAnime('hunterxhunter',['seinen', 'aventura']).
 generoAnime('hamtaro',['kodomo']).
 generoAnime('full metal alchemist',['shounen', 'magia']).
+
+%Rating 
 rating('dragon ball',3).
 rating('naruto',1).
 rating('bleach',4).
 rating('hunterxhunter',5).
 rating('hamtaro',2).
 rating('full metal alchemist',4).
+
+%Popularidad
 popularidad('dragon ball',7).
 popularidad('naruto',5).
 popularidad('bleach',8).
@@ -31,6 +35,14 @@ popularidad('full metal alchemist',1).
 % base de datos de las respuestas genericas %
 respuestas_genericas('No te he entendido, preguntame algo que conozca').
 respuestas_genericas('Por favor, preguntame algo que sepa responder').
+
+
+%find mayor
+mayorPopularidad(Mayor) :-
+    findall(Num, popularidad(_,Num), L ), sort(L, L2), reverse(L2, [Mayor|_]).
+
+mayorRating(Mayor) :-
+    findall(Num, rating(_,Num), L ), sort(L, L2), reverse(L2, [Mayor|_]).
 
 % base de datos para las respuestas especificas %
 specific_answer(["bien"]) :-
@@ -57,6 +69,30 @@ specific_answer(["cuales", "son", "los", "animes", "ordenados", "por", "rating",
     % sort funciona de menor a mayor, hacemos reverse %
     reverse(AnimesSorted, AnimesReverse),
     print_by_rating(AnimesReverse).
+
+% Animes por genero ordenados por popularida %
+specific_answer(["cuales", "son", "los", "animes", "ordenados", "por", "popularidad", "del",
+                "genero", Genre]) :-
+    remove_char(Genre, '?', Gendreaux),
+    findall(Anime, anime(Anime), Animes),
+    animeygenero(Gendreaux, Animes, AnimesGendre),
+    make_popularidad_list(AnimesGendre, AnimesRating),
+    sort(AnimesRating, AnimesSorted),
+    % sort funciona de menor a mayor, hacemos reverse %
+    reverse(AnimesSorted, AnimesReverse),
+    print_by_rating(AnimesReverse).
+
+specific_answer(["cuales", "son", "los", "mejores" ,"ratings?"]) :-
+    mayorRating(Mayor),
+    findall((Mayor,Anime), rating(Anime, Mayor), L ),
+    write('\n'),
+    print_by_rating(L).
+
+specific_answer(["cuales", "son", "los", "mas" ,"populares?"]) :-
+    mayorPopularidad(Mayor),
+    findall((Mayor,Anime), popularidad(Anime, Mayor), L ),
+    write('\n'),
+    print_by_rating(L).
 
 specific_answer(["salir"]) :-
     halt.
@@ -104,7 +140,7 @@ print_list([A|B]) :-
 
 % Funcion para imprimir una lista de tuplas. Tomando el segundo elemento %
 print_list_tuple([]).
-print_list_tuple([(A,B)|Z]) :-
+print_list_tuple([(_,B)|Z]) :-
   format('~w\n', B),
   print_list_tuple(Z).
 
@@ -113,6 +149,13 @@ make_rating_list([], []).
 make_rating_list([Anime | Animes], [(Rating, Anime)| AnimeandRating]) :-
     rating(Anime, Rating),
     make_rating_list(Animes, AnimeandRating).
+
+
+% funcion para crear una lista de tipo (anime, rating) %
+make_popularidad_list([], []).
+make_popularidad_list([Anime | Animes], [(Popularidad, Anime)| AnimeandRating]) :-
+    popularidad(Anime, Popularidad),
+    make_popularidad_list(Animes, AnimeandRating).
 
 % Funcion para eliminar un caracter de un string %
 remove_char(S,C,X) :- 
