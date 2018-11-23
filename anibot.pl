@@ -28,9 +28,9 @@ rating('full metal alchemist',4).
 popularidad('dragon ball',7).
 popularidad('naruto',5).
 popularidad('bleach',8).
-popularidad('hunterxhunter',3).
+popularidad('hunterxhunter',5).
 popularidad('hamtaro',10).
-popularidad('full metal alchemist',1).
+popularidad('full metal alchemist', 3).
 
 % base de datos de las respuestas genericas %
 respuestas_genericas('No te he entendido, preguntame algo que conozca').
@@ -96,11 +96,12 @@ specific_answer(["cuales", "son", "los", "mas" ,"populares?"]) :-
 
 % Animes de X estrellas
 specific_answer(["cuales", "son", "los", "animes" , "del", "genero", Genre, "de", X, "estrellas?"]) :-
+    atom_string(Genreaux, Genre),
     atom_number(X, Rating),
     Rating =< 5,
     Rating > 0,
     findall(Anime, anime(Anime), Animes),
-    animeygenero(Gendreaux, Animes, AnimesGendre),
+    animeygenero(Genreaux, Animes, AnimesGendre),
     animexestrellas(Rating, AnimesGendre, AnimesEstrellas),
     length(AnimesEstrellas, Length),
     Length >= 1,
@@ -108,21 +109,26 @@ specific_answer(["cuales", "son", "los", "animes" , "del", "genero", Genre, "de"
     print_list(AnimesEstrellas),
     anibot('').
 
-specific_answer(["cuales", "son", "los", "animes" , "del", "genero", Genre, "de", X, "estrellas?"]) :-
+specific_answer(["cuales", "son", "los", "animes" , "del", "genero", _, "de", X, "estrellas?"]) :-
     atom_number(X, Rating),
     Rating > 5,
     anibot('Querido, el rating es hasta 5 estrellas').
 
-specific_answer(["cuales", "son", "los", "animes" , "del", "genero", Genre, "de", X, "estrellas?"]) :-
+specific_answer(["cuales", "son", "los", "animes" , "del", "genero", _, "de", X, "estrellas?"]) :-
     atom_number(X, Rating),
     Rating < 0,
     anibot('No creas que soy tan tonta, el rating no puede ser negativo').
 
-specific_answer(["cuales", "son", "los", "animes" , "del", "genero", Genre, "de", X, "estrellas?"]) :-
+specific_answer(["cuales", "son", "los", "animes" , "del", "genero", _, "de", X, "estrellas?"]) :-
     string_concat("No hay animes de ese genero con ", X, Mensaje),
     string_concat(Mensaje, " estrellas", Mensajeaux),
     anibot(Mensajeaux).
 
+specific_answer(["cuales", "animes" , "son", "buenos", "pero", "poco", "conocidos?"]) :-
+    findall([Anime, Popularidad], popularidad(Anime, Popularidad), Animepopularidad),
+    list_by_knowing(Animepopularidad, AnimeRating),
+    print_by_knowing(AnimeRating),
+    anibot('').
 
 specific_answer(["salir"]) :-
     halt.
@@ -139,7 +145,7 @@ animeygenero(Gendre, [Anime| Animes], [Anime| AnimesGendre]) :-
     member(Gendre, Gendreaux), !,
     animeygenero(Gendre, Animes, AnimesGendre).
 
-animeygenero(Gendre, [Anime| Animes], AnimesGendre) :- 
+animeygenero(Gendre, [ _ | Animes], AnimesGendre) :- 
     animeygenero(Gendre, Animes, AnimesGendre).
 
 % Funcion para imprimir los animes por genero %
@@ -197,8 +203,32 @@ animexestrellas(X, [Anime | Animes], [Anime | AnimesEstrellas]) :-
     X == Rating,
     animexestrellas(X, Animes, AnimesEstrellas).
 
-animexestrellas(X, [Anime | Animes], AnimesEstrellas) :-
+animexestrellas(X, [ _ | Animes], AnimesEstrellas) :-
     animexestrellas(X, Animes, AnimesEstrellas).
+
+% Funcion que imprime los animes con popularidad baja y rating alto %
+
+print_by_knowing([]) :-
+    write('Lo siento pero no hay anime buenos poco conocidos, deberias agregar alguno').
+
+print_by_knowing(AnimeRating) :- 
+    write('Te dire cuales son, espero que veas alguno'), nl,
+    print_list(AnimeRating).
+
+list_by_knowing([], []).
+list_by_knowing([[Anime, Popularidad] | Animepopularidad], [Anime | AnimeRating]) :-
+    Popularidad >= 3,
+    Popularidad =< 5,
+    rating(Anime, Rating),
+    Rating >= 4,
+    Rating =< 5,
+    write(Anime), nl,
+    list_by_knowing(Animepopularidad, AnimeRating).
+
+list_by_knowing([ _ | Animepopularidad], AnimeRating) :- 
+    list_by_knowing(Animepopularidad, AnimeRating).
+
+
 
 % Funcion para eliminar un caracter de un string %
 remove_char(S,C,X) :- 
