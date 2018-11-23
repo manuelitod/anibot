@@ -70,7 +70,7 @@ specific_answer(["cuales", "son", "los", "animes", "ordenados", "por", "rating",
     reverse(AnimesSorted, AnimesReverse),
     print_by_rating(AnimesReverse).
 
-% Animes por genero ordenados por popularida %
+% Animes por genero ordenados por popularidad %
 specific_answer(["cuales", "son", "los", "animes", "ordenados", "por", "popularidad", "del",
                 "genero", Genre]) :-
     remove_char(Genre, '?', Gendreaux),
@@ -93,6 +93,36 @@ specific_answer(["cuales", "son", "los", "mas" ,"populares?"]) :-
     findall((Mayor,Anime), popularidad(Anime, Mayor), L ),
     write('\n'),
     print_by_rating(L).
+
+% Animes de X estrellas
+specific_answer(["cuales", "son", "los", "animes" , "del", "genero", Genre, "de", X, "estrellas?"]) :-
+    atom_number(X, Rating),
+    Rating =< 5,
+    Rating > 0,
+    findall(Anime, anime(Anime), Animes),
+    animeygenero(Gendreaux, Animes, AnimesGendre),
+    animexestrellas(Rating, AnimesGendre, AnimesEstrellas),
+    length(AnimesEstrellas, Length),
+    Length >= 1,
+    write('Son los siguientes: '), nl,
+    print_list(AnimesEstrellas),
+    anibot('').
+
+specific_answer(["cuales", "son", "los", "animes" , "del", "genero", Genre, "de", X, "estrellas?"]) :-
+    atom_number(X, Rating),
+    Rating > 5,
+    anibot('Querido, el rating es hasta 5 estrellas').
+
+specific_answer(["cuales", "son", "los", "animes" , "del", "genero", Genre, "de", X, "estrellas?"]) :-
+    atom_number(X, Rating),
+    Rating < 0,
+    anibot('No creas que soy tan tonta, el rating no puede ser negativo').
+
+specific_answer(["cuales", "son", "los", "animes" , "del", "genero", Genre, "de", X, "estrellas?"]) :-
+    string_concat("No hay animes de ese genero con ", X, Mensaje),
+    string_concat(Mensaje, " estrellas", Mensajeaux),
+    anibot(Mensajeaux).
+
 
 specific_answer(["salir"]) :-
     halt.
@@ -156,6 +186,19 @@ make_popularidad_list([], []).
 make_popularidad_list([Anime | Animes], [(Popularidad, Anime)| AnimeandRating]) :-
     popularidad(Anime, Popularidad),
     make_popularidad_list(Animes, AnimeandRating).
+
+% Funcion que dado una lista de anime y una cantidad de estrellas X %
+% devuelve aquellos animes cuyo rating sea X %
+
+animexestrellas(_, [], []).
+
+animexestrellas(X, [Anime | Animes], [Anime | AnimesEstrellas]) :-
+    rating(Anime, Rating),
+    X == Rating,
+    animexestrellas(X, Animes, AnimesEstrellas).
+
+animexestrellas(X, [Anime | Animes], AnimesEstrellas) :-
+    animexestrellas(X, Animes, AnimesEstrellas).
 
 % Funcion para eliminar un caracter de un string %
 remove_char(S,C,X) :- 
