@@ -56,7 +56,6 @@ mayorRating(Mayor) :-
 getname([X|Z], Name, Cola) :-
     X \= "rating", 
     string_concat(X, " ", Xs),   
-    write(Xs), 
     getname(Z, Y, Cola),
     string_concat(Xs, Y, NameAux),
     normalize_space(string(Name), NameAux).
@@ -68,31 +67,42 @@ getname([X|Z], "", [X|Z]) :-
 getRating(["rating", Num| Resto], Rating, Resto) :-
     number_string(Rating, Num).
 
+getGeneros(["de", "los", "generos"|Xs],ListaGeneros, Resto ) :-
+    getGeneros(Xs, ListaGeneros, Resto).
+
 getGeneros(["del", "genero",X|Xs],ListaGeneros, Resto ) :-
     X \= "popularidad", getGeneros(Xs, Lista, Resto ), genero(X),
     append( [X],Lista, ListaGeneros).
 
 
-getGeneros(["de", "los", "generos",X|Xs],ListaGeneros, Resto ) :-
+
+getGeneros([X|Xs],ListaGeneros, Resto ) :-
     X \= "popularidad", getGeneros(Xs, Lista, Resto ), genero(X),
     append( [X],Lista, ListaGeneros).
 
 getGeneros([X], X, []) :- genero(X).
 
-getGeneros([X|_], [], [X|_]) :- X = "popularidad".
+getGeneros([X|Y], [], [X|Y]) :- X = "popularidad".
 
 %Sin popularidad
 addAnime(Name, Rating, Generos, []) :-
-    assert(anime(Name, Generos)),
-    assert(rating(Name, Rating)),
-    anibot('Se agrego ese anime\n').
+    asserta(anime(Name)), asserta(generoAnime(Name,Generos)),
+    asserta(rating(Name, Rating)),
+    assert(popularidad(Name,1)),
+    split_string(Name, " ", "", Anime),
+    append(["cuentame", "sobre", "el", "anime"], Anime, Consulta),
+    specific_answer(Consulta).
+     
 
 
 addAnime(Name, Rating,Generos, [X,Y|_]) :-
-    assert(anime(Name, Generos)),
-    assert(rating(Name, Rating)),
-    number_string(Num, Y), assert(popularidad(Name, Num)),
-    anibot("Se agrego ese anime").
+    asserta(anime(Name)), asserta(generoAnime(Name,Generos)),
+    asserta(rating(Name, Rating)),
+    number_string(Num, Y), asserta(popularidad(Name, Num)),
+    split_string(Name, " ", "", Anime),
+    append(["cuentame", "sobre", "el", "anime"], Anime, Consulta),
+    specific_answer(Consulta).
+    %write(Consulta).
 
 
 specific_answer(["agregar", "el", "anime"|Cola]) :-
