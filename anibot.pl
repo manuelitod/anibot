@@ -4,6 +4,8 @@
 :- dynamic rating/2.
 :- dynamic popularidad/2.
 
+:- set_prolog_flag(double_quotes, chars).
+:- use_module(library(double_quotes)).
 % Para hacernos la vida mas facil trabajemos todos los strings en minuscula %
 
 anime(X) :- member(X,['dragon ball', 'naruto', 'bleach', 'hunterxhunter', 'hamtaro', 'full metal alchemist']).
@@ -37,7 +39,10 @@ respuestas_genericas('No te he entendido, preguntame algo que conozca').
 respuestas_genericas('Por favor, preguntame algo que sepa responder').
 
 
-%find mayor
+    
+
+
+%find mayor%
 mayorPopularidad(Mayor) :-
     findall(Num, popularidad(_,Num), L ), sort(L, L2), reverse(L2, [Mayor|_]).
 
@@ -45,6 +50,24 @@ mayorRating(Mayor) :-
     findall(Num, rating(_,Num), L ), sort(L, L2), reverse(L2, [Mayor|_]).
 
 % base de datos para las respuestas especificas %
+getname([X|Z]) :-
+    X \= "rating",
+    write(X).
+
+getname([X|Z], Name, Cola) :-
+    X \= "rating", 
+    append(X, " ", Xs),   
+    write(Xs), 
+    getname(Z, Y, Cola),
+    append(Xs, Y, Name).
+
+getname([X|Z], [], [X|Z]) :-
+    X = "rating".
+
+
+specific_answer(["Agregar", "el", "anime"|Cola]) :-
+    getname(Cola, Name, Cola).
+
 specific_answer(["bien"]) :-
     anibot('Me alegra mucho. De que quieres hablar?').
 
