@@ -5,6 +5,8 @@
 :- dynamic popularidad/2.
 :- dynamic consultas/2.
 
+%:- set_prolog_flag(double_quotes, chars).
+%:- use_module(library(double_quotes)).
 % Para hacernos la vida mas facil trabajemos todos los strings en minuscula %
 
 anime(X) :- member(X,["dragon ball", "naruto", "bleach", "hunterxhunter", "hamtaro", "full metal alchemist"]).
@@ -38,7 +40,10 @@ respuestas_genericas("No te he entendido, preguntame algo que conozca").
 respuestas_genericas("Por favor, preguntame algo que sepa responder").
 
 
-%find mayor
+    
+
+
+%find mayor%
 mayorPopularidad(Mayor) :-
     findall(Num, popularidad(_,Num), L ), sort(L, L2), reverse(L2, [Mayor|_]).
 
@@ -46,6 +51,65 @@ mayorRating(Mayor) :-
     findall(Num, rating(_,Num), L ), sort(L, L2), reverse(L2, [Mayor|_]).
 
 % base de datos para las respuestas especificas %
+
+
+getname([X|Z], Name, Cola) :-
+    X \= "rating", 
+    string_concat(X, " ", Xs),   
+    getname(Z, Y, Cola),
+    string_concat(Xs, Y, NameAux),
+    normalize_space(string(Name), NameAux).
+    
+
+getname([X|Z], "", [X|Z]) :-
+    X = "rating".
+
+getRating(["rating", Num| Resto], Rating, Resto) :-
+    number_string(Rating, Num).
+
+getGeneros(["de", "los", "generos"|Xs],ListaGeneros, Resto ) :-
+    getGeneros(Xs, ListaGeneros, Resto).
+
+getGeneros(["del", "genero",X|Xs],ListaGeneros, Resto ) :-
+    X \= "popularidad", getGeneros(Xs, Lista, Resto ), genero(X),
+    append( [X],Lista, ListaGeneros).
+
+
+
+getGeneros([X|Xs],ListaGeneros, Resto ) :-
+    X \= "popularidad", getGeneros(Xs, Lista, Resto ), genero(X),
+    append( [X],Lista, ListaGeneros).
+
+getGeneros([X], X, []) :- genero(X).
+
+getGeneros([X|Y], [], [X|Y]) :- X = "popularidad".
+
+%Sin popularidad
+addAnime(Name, Rating, Generos, []) :-
+    asserta(anime(Name)), asserta(generoAnime(Name,Generos)),
+    asserta(rating(Name, Rating)),
+    assert(popularidad(Name,1)),
+    split_string(Name, " ", "", Anime),
+    append(["cuentame", "sobre", "el", "anime"], Anime, Consulta),
+    specific_answer(Consulta).
+     
+
+
+addAnime(Name, Rating,Generos, [X,Y|_]) :-
+    asserta(anime(Name)), asserta(generoAnime(Name,Generos)),
+    asserta(rating(Name, Rating)),
+    number_string(Num, Y), asserta(popularidad(Name, Num)),
+    split_string(Name, " ", "", Anime),
+    append(["cuentame", "sobre", "el", "anime"], Anime, Consulta),
+    specific_answer(Consulta).
+    %write(Consulta).
+
+
+specific_answer(["agregar", "el", "anime"|Cola]) :-
+    getname(Cola, Name, ColaAux), getRating(ColaAux,Rating, GenerosYPopularidad),
+    getGeneros(GenerosYPopularidad, Generos, Popularidad), 
+    addAnime(Name, Rating, Generos, Popularidad).
+
 specific_answer(["bien"]) :-
     anibot("Me alegra mucho. De que quieres hablar?").
 
