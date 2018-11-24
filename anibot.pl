@@ -59,15 +59,18 @@ specific_answer(["cuales", "son", "los", "animes", "del", "genero", Genre]) :-
     print_by_genre(AnimesGendre).
 
 % Animes ordenados por rating y popularidad %
-specific_answer(["cuales", "son", "los", "animes", "del", "genero", Genre, "ordenados", "por",
-                "rating", "y", "popularidad?"]) :-
-    atom_string(Genreaux, Genre),
-    findall(Anime, anime(Anime), Animes),
-    animeygenero(Genreaux, Animes, AnimesGendre),
-    make_rating_and_popularity_list(AnimesGendre, AnimeGP),
-    sort(AnimeGP, AnimesSorted),
-    reverse(AnimesSorted, AnimesReverse),
-    print_by_rating(AnimesReverse).
+specific_answer(["cuales", "son", "los", "animes", "del", "genero", Genre, "ordenados", "por", 
+                "popularidad", "y", "rating?"]) :-
+    anime_by_genre_rating_popularity(Genre, true).
+
+specific_answer(["cuales", "son", "los", "animes", "del", "genero", Genre, "ordenados", "por", 
+                "popularidad", "y", "rating", "de", "mayor", "a", "menor?"]) :-      
+    anime_by_genre_rating_popularity(Genre, true).
+
+specific_answer(["cuales", "son", "los", "animes", "del", "genero", Genre, "ordenados", "por", 
+                "popularidad", "y", "rating", "de", "menor", "a", "mayor?"]) :- 
+    anime_by_genre_rating_popularity(Genre, false).
+
 
 % Animes por genero ordenados por rating %
 specific_answer(["cuales", "son", "los", "animes", "ordenados", "por", "rating", "del",
@@ -151,7 +154,7 @@ specific_answer(_) :-
     anibot('No he entendido eso.\n Dime algo en que te pueda ayudar').
 
 
-% Funcion para %
+%   Funcion para determinar el orden a mostrar en los animes por genero y popularidad %
 
 anime_by_genre_popularity(Genre, IsReverse) :-
     remove_char(Genre, '?', Genreaux), 
@@ -170,6 +173,26 @@ anime_by_genre_popularity(Genre, IsReverse) :-
     animeygenero(Genreaux, Animes, AnimesGendre),
     make_popularidad_list(AnimesGendre, AnimesRating),
     sort(AnimesRating, AnimesSorted),
+    \+ IsReverse,
+    print_by_rating(AnimesSorted).
+
+% Funcion para determinar el orden a mostrar de los animes por genero, popularidad y rating %
+anime_by_genre_rating_popularity(Genre, IsReverse) :-
+    atom_string(Genreaux, Genre),
+    findall(Anime, anime(Anime), Animes),
+    animeygenero(Genreaux, Animes, AnimesGendre),
+    make_rating_and_popularity_list(AnimesGendre, AnimeGP),
+    sort(AnimeGP, AnimesSorted),
+    IsReverse,
+    reverse(AnimesSorted, AnimesReverse),
+    print_by_rating(AnimesReverse).
+
+anime_by_genre_rating_popularity(Genre, IsReverse) :-
+    atom_string(Genreaux, Genre),
+    findall(Anime, anime(Anime), Animes),
+    animeygenero(Genreaux, Animes, AnimesGendre),
+    make_rating_and_popularity_list(AnimesGendre, AnimeGP),
+    sort(AnimeGP, AnimesSorted),
     \+ IsReverse,
     print_by_rating(AnimesSorted).
 
