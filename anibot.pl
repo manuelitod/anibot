@@ -4,8 +4,8 @@
 :- dynamic rating/2.
 :- dynamic popularidad/2.
 
-:- set_prolog_flag(double_quotes, chars).
-:- use_module(library(double_quotes)).
+%:- set_prolog_flag(double_quotes, chars).
+%:- use_module(library(double_quotes)).
 % Para hacernos la vida mas facil trabajemos todos los strings en minuscula %
 
 anime(X) :- member(X,["dragon ball", "naruto", "bleach", "hunterxhunter", "hamtaro", "full metal alchemist"]).
@@ -50,23 +50,46 @@ mayorRating(Mayor) :-
     findall(Num, rating(_,Num), L ), sort(L, L2), reverse(L2, [Mayor|_]).
 
 % base de datos para las respuestas especificas %
-getname([X|Z]) :-
-    X \= "rating",
-    write(X).
+
 
 getname([X|Z], Name, Cola) :-
     X \= "rating", 
-    append(X, " ", Xs),   
+    string_concat(X, " ", Xs),   
     write(Xs), 
     getname(Z, Y, Cola),
-    append(Xs, Y, Name).
+    string_concat(Xs, Y, NameAux),
+    normalize_space(string(Name), NameAux).
+    
 
-getname([X|Z], [], [X|Z]) :-
+getname([X|Z], "", [X|Z]) :-
     X = "rating".
+
+getRating(["rating", Num| Resto], Rating, Resto) :-
+    number_string(Rating, Num).
+
+getGeneros([X|Xs],ListaGeneros, Resto ) :-
+    X \= "popularidad", getGeneros(Xs, Lista, Resto ), genero(X),
+    append( [X],Lista, ListaGeneros).
+
+getGeneros([X], X, []) :- genero(X).
+
+getGeneros([X|_], [], [X|_]) :- X = "popularidad".
+
+%Sin popularidad
+addAnime(Name, Rating, Generos, []) :-
+    assert(anime(Name, Generos)),
+    aseert(rating(Name, Rating)).
+
+addAnime(Name, Rating,Generos, [X,Y|_]) :-
+    assert(anime(Name, Generos)),
+    assert(rating(Name, Rating)),
+    number_string(Num, Y), assert(popularidad(Name, Num).
 
 
 specific_answer(["Agregar", "el", "anime"|Cola]) :-
-    getname(Cola, Name, Cola).
+    getname(Cola, Name, ColaAux), getRating(ColaAux,Rating, GenerosYPopularidad),
+    getGeneros(GenerosYPopularidad, Generos, Popularidad), 
+    addAnime(Name, Rating, Generos, Popularidad).
 
 specific_answer(["bien"]) :-
     anibot("Me alegra mucho. De que quieres hablar?").
