@@ -67,7 +67,12 @@ getname([X|Z], "", [X|Z]) :-
 getRating(["rating", Num| Resto], Rating, Resto) :-
     number_string(Rating, Num).
 
-getGeneros([X|Xs],ListaGeneros, Resto ) :-
+getGeneros(["del", "genero",X|Xs],ListaGeneros, Resto ) :-
+    X \= "popularidad", getGeneros(Xs, Lista, Resto ), genero(X),
+    append( [X],Lista, ListaGeneros).
+
+
+getGeneros(["de", "los", "generos",X|Xs],ListaGeneros, Resto ) :-
     X \= "popularidad", getGeneros(Xs, Lista, Resto ), genero(X),
     append( [X],Lista, ListaGeneros).
 
@@ -78,15 +83,18 @@ getGeneros([X|_], [], [X|_]) :- X = "popularidad".
 %Sin popularidad
 addAnime(Name, Rating, Generos, []) :-
     assert(anime(Name, Generos)),
-    aseert(rating(Name, Rating)).
+    assert(rating(Name, Rating)),
+    anibot('Se agrego ese anime\n').
+
 
 addAnime(Name, Rating,Generos, [X,Y|_]) :-
     assert(anime(Name, Generos)),
     assert(rating(Name, Rating)),
-    number_string(Num, Y), assert(popularidad(Name, Num).
+    number_string(Num, Y), assert(popularidad(Name, Num)),
+    anibot("Se agrego ese anime").
 
 
-specific_answer(["Agregar", "el", "anime"|Cola]) :-
+specific_answer(["agregar", "el", "anime"|Cola]) :-
     getname(Cola, Name, ColaAux), getRating(ColaAux,Rating, GenerosYPopularidad),
     getGeneros(GenerosYPopularidad, Generos, Popularidad), 
     addAnime(Name, Rating, Generos, Popularidad).
