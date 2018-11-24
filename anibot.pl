@@ -3,6 +3,7 @@
 :- dynamic generoAnime/2.
 :- dynamic rating/2.
 :- dynamic popularidad/2.
+:- dynamic consultas/2.
 
 % Para hacernos la vida mas facil trabajemos todos los strings en minuscula %
 
@@ -152,11 +153,39 @@ specific_answer(["cuales", "animes" , "son", "buenos", "pero", "poco", "conocido
     print_by_knowing(AnimeRating),
     anibot("").
 
+specific_answer(["cuentame", "sobre", "el", "anime" | Anime]) :-
+    atomic_list_concat(Anime, ' ', Atom), 
+    atom_string(Atom, Animestring),
+    anime(Animestring),
+    write("Genial! Se cual es ese anime, su rating es "),
+    rating(Animestring, Rating),
+    write(Rating), nl,
+    write("Su popularidad es "),
+    popularidad(Animestring, Popularidad),
+    write(Popularidad), nl,
+    write("y sus generos son "),
+    generoAnime(Animestring, Generos),
+    atomic_list_concat(Generos, ',', Atomgenero),
+    atom_string(Atomgenero, Generostring),
+    write(Generostring),
+    anibot('').
+
+specific_answer(["cuentame", "sobre", "el", "anime" | Anime]) :-
+    atomic_list_concat(Anime, ' ', Atom), 
+    atom_string(Atom, Animestring),
+    write("Disculpa, el anime "),
+    write(Animestring),
+    write(" No esta en mi base de datos, pero podrias agregarlo si quieres"),
+    % aqui si quieres en vez de llamar al bot preguntamos genero y rating y agregamos a la bd %
+    anibot('').
+
 specific_answer(["salir"]) :-
     halt.
 
 specific_answer(_) :-
     anibot("No he entendido eso.\n Dime algo en que te pueda ayudar").
+
+
 
 
 %   Funcion para determinar el orden a mostrar en los animes por genero y popularidad %
