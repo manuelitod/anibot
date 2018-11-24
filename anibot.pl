@@ -176,9 +176,23 @@ specific_answer(["cuentame", "sobre", "el", "anime" | Anime]) :-
     atom_string(Atom, Animestring),
     write("Disculpa, el anime "),
     write(Animestring),
-    write(" No esta en mi base de datos, pero podrias agregarlo si quieres"),
+    write(" No esta en mi base de datos, pero podrias agregarlo si quieres"), nl,
+    write("Cuales son sus generos?"), nl,
+    read(Genres),
+    string_lower(Genres, Genres_Lower),
+    split_string(Genres_Lower, " ", "", Genreslist),
+    write("Cual es su rating?"), nl,
+    read(Ratingint),
+    validate_rating(Ratingint),
+    asserta(anime(Animestring)),
+    asserta(generoAnime(Animestring, Genreslist)),
+    asserta(rating(Animestring, Ratingint)),
+    asserta(popularidad(Animestring, 1)),
+    string_concat("Ahora se todo sobre el anime ", Animestring, Msgaux),
+    anibot(Msgaux).
 
-    anibot('').
+specific_answer(["cuentame", "sobre", "el", "anime" | _]) :-
+    anibot("Amigo el rating debe ser entre 1 y 5. Intenta agregar el anime de nuevo\n").
 
 specific_answer(["salir"]) :-
     halt.
@@ -373,7 +387,9 @@ popularity_message(Popularidad, "muy conocido") :-
 
 popularity_message(_, "bastante conocido").
 
-
+validate_rating(Ratingint) :-
+    Ratingint >= 1,
+    Ratingint =< 5.
 
 
 % Funcion para eliminar un caracter de un string %
