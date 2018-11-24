@@ -162,7 +162,8 @@ specific_answer(["cuentame", "sobre", "el", "anime" | Anime]) :-
     write(Rating), nl,
     write("Su popularidad es "),
     popularidad(Animestring, Popularidad),
-    write(Popularidad), nl,
+    popularity_message(Popularidad, Msg),
+    write(Msg), nl,
     write("y sus generos son "),
     generoAnime(Animestring, Generos),
     atomic_list_concat(Generos, ',', Atomgenero),
@@ -176,7 +177,7 @@ specific_answer(["cuentame", "sobre", "el", "anime" | Anime]) :-
     write("Disculpa, el anime "),
     write(Animestring),
     write(" No esta en mi base de datos, pero podrias agregarlo si quieres"),
-    % aqui si quieres en vez de llamar al bot preguntamos genero y rating y agregamos a la bd %
+
     anibot('').
 
 specific_answer(["salir"]) :-
@@ -352,6 +353,26 @@ list_by_knowing([[Anime, Popularidad] | Animepopularidad], [Anime | AnimeRating]
 
 list_by_knowing([ _ | Animepopularidad], AnimeRating) :- 
     list_by_knowing(Animepopularidad, AnimeRating).
+
+% Funcion para saber que mensaje decir dada una popularidad %
+popularity_message(Popularidad, "muy poco conocido") :-
+    Popularidad >= 1,
+    Popularidad =< 2.
+
+popularity_message(Popularidad, "poco conocido") :-
+    Popularidad >= 3,
+    Popularidad =< 5.
+
+popularity_message(Popularidad, "conocido") :-
+    Popularidad >= 6,
+    Popularidad =< 7.
+
+popularity_message(Popularidad, "muy conocido") :-
+    Popularidad >= 8,
+    Popularidad =< 9.
+
+popularity_message(_, "bastante conocido").
+
 
 
 
