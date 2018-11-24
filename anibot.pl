@@ -76,15 +76,19 @@ specific_answer(["cuales", "son", "los", "animes", "del", "genero", Genre, "orde
 % Animes por genero ordenados por rating %
 specific_answer(["cuales", "son", "los", "animes", "ordenados", "por", "rating", "del",
                 "genero", Genre]) :-
-    remove_char(Genre, '?', Gendreaux),
-    atom_string(Gendreaux, Genreaux1),
-    findall(Anime, anime(Anime), Animes),
-    animeygenero(Genreaux1, Animes, AnimesGendre),
-    make_rating_list(AnimesGendre, AnimesRating),
-    sort(AnimesRating, AnimesSorted),
-    % sort funciona de menor a mayor, hacemos reverse %
-    reverse(AnimesSorted, AnimesReverse),
-    print_by_rating(AnimesReverse).
+    anime_by_genre_rating(Genre, true).
+
+specific_answer(["cuales", "son", "los", "animes", "ordenados", "por", "rating", 
+                "de", "mayor", "a", "menor", "del", "genero", Genre]) :-
+    anime_by_genre_rating(Genre, true).
+
+specific_answer(["cuales", "son", "los", "animes", "ordenados", "por", "rating", 
+                "de", "menor", "a", "mayor", "del", "genero", Genre]) :-
+    anime_by_genre_rating(Genre, false).
+
+specific_answer(["cuales", "son", "los", "animes", "ordenados", "por", "rating", "del",
+                "genero", Genre]) :-
+    anime_by_genre_rating(Genre, true).
 
 % Animes por genero ordenados por popularidad %
 specific_answer(["cuales", "son", "los", "animes", "ordenados", "por", "popularidad", "del",
@@ -194,6 +198,29 @@ anime_by_genre_rating_popularity(Genre, IsReverse) :-
     animeygenero(Genre, Animes, AnimesGendre),
     make_rating_and_popularity_list(AnimesGendre, AnimeGP),
     sort(AnimeGP, AnimesSorted),
+    \+ IsReverse,
+    print_by_rating(AnimesSorted).
+
+% Funcion para determinar el orden a mostrar de los animes por genero y rating %
+anime_by_genre_rating(Genre, IsReverse) :-
+    remove_char(Genre, '?', Gendreaux),
+    atom_string(Gendreaux, Genreaux1),
+    findall(Anime, anime(Anime), Animes),
+    animeygenero(Genreaux1, Animes, AnimesGendre),
+    make_rating_list(AnimesGendre, AnimesRating),
+    sort(AnimesRating, AnimesSorted),
+    IsReverse,
+    % sort funciona de menor a mayor, hacemos reverse %
+    reverse(AnimesSorted, AnimesReverse),
+    print_by_rating(AnimesReverse).
+
+anime_by_genre_rating(Genre, IsReverse) :-
+    remove_char(Genre, '?', Gendreaux),
+    atom_string(Gendreaux, Genreaux1),
+    findall(Anime, anime(Anime), Animes),
+    animeygenero(Genreaux1, Animes, AnimesGendre),
+    make_rating_list(AnimesGendre, AnimesRating),
+    sort(AnimesRating, AnimesSorted),
     \+ IsReverse,
     print_by_rating(AnimesSorted).
 
