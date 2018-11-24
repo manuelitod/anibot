@@ -3,6 +3,7 @@
 :- dynamic generoAnime/2.
 :- dynamic rating/2.
 :- dynamic popularidad/2.
+:- dynamic consultas/2.
 
 %:- set_prolog_flag(double_quotes, chars).
 %:- use_module(library(double_quotes)).
@@ -206,11 +207,54 @@ specific_answer(["cuales", "animes" , "son", "buenos", "pero", "poco", "conocido
     print_by_knowing(AnimeRating),
     anibot("").
 
+specific_answer(["cuentame", "sobre", "el", "anime" | Anime]) :-
+    atomic_list_concat(Anime, ' ', Atom), 
+    atom_string(Atom, Animestring),
+    anime(Animestring),
+    write("Genial! Se cual es ese anime, su rating es "),
+    rating(Animestring, Rating),
+    write(Rating), nl,
+    write("Su popularidad es "),
+    popularidad(Animestring, Popularidad),
+    popularity_message(Popularidad, Msg),
+    write(Msg), nl,
+    write("y sus generos son "),
+    generoAnime(Animestring, Generos),
+    atomic_list_concat(Generos, ',', Atomgenero),
+    atom_string(Atomgenero, Generostring),
+    write(Generostring),
+    anibot('').
+
+specific_answer(["cuentame", "sobre", "el", "anime" | Anime]) :-
+    atomic_list_concat(Anime, ' ', Atom), 
+    atom_string(Atom, Animestring),
+    write("Disculpa, el anime "),
+    write(Animestring),
+    write(" No esta en mi base de datos, pero podrias agregarlo si quieres"), nl,
+    write("Cuales son sus generos?"), nl,
+    read(Genres),
+    string_lower(Genres, Genres_Lower),
+    split_string(Genres_Lower, " ", "", Genreslist),
+    write("Cual es su rating?"), nl,
+    read(Ratingint),
+    validate_rating(Ratingint),
+    asserta(anime(Animestring)),
+    asserta(generoAnime(Animestring, Genreslist)),
+    asserta(rating(Animestring, Ratingint)),
+    asserta(popularidad(Animestring, 1)),
+    string_concat("Ahora se todo sobre el anime ", Animestring, Msgaux),
+    anibot(Msgaux).
+
+specific_answer(["cuentame", "sobre", "el", "anime" | _]) :-
+    anibot("Amigo el rating debe ser entre 1 y 5. Intenta agregar el anime de nuevo\n").
+
 specific_answer(["salir"]) :-
     halt.
 
 specific_answer(_) :-
     anibot("No he entendido eso.\n Dime algo en que te pueda ayudar").
+
+
 
 
 %   Funcion para determinar el orden a mostrar en los animes por genero y popularidad %
@@ -378,6 +422,28 @@ list_by_knowing([[Anime, Popularidad] | Animepopularidad], [Anime | AnimeRating]
 list_by_knowing([ _ | Animepopularidad], AnimeRating) :- 
     list_by_knowing(Animepopularidad, AnimeRating).
 
+% Funcion para saber que mensaje decir dada una popularidad %
+popularity_message(Popularidad, "muy poco conocido") :-
+    Popularidad >= 1,
+    Popularidad =< 2.
+
+popularity_message(Popularidad, "poco conocido") :-
+    Popularidad >= 3,
+    Popularidad =< 5.
+
+popularity_message(Popularidad, "conocido") :-
+    Popularidad >= 6,
+    Popularidad =< 7.
+
+popularity_message(Popularidad, "muy conocido") :-
+    Popularidad >= 8,
+    Popularidad =< 9.
+
+popularity_message(_, "bastante conocido").
+
+validate_rating(Ratingint) :-
+    Ratingint >= 1,
+    Ratingint =< 5.
 
 
 % Funcion para eliminar un caracter de un string %
