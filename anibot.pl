@@ -82,7 +82,7 @@ getname([X|Z], "", [X|Z]) :-
 % getRating(List, Rating,Resto) :- Lista de strings, Rating es entero con el rating, Resto tiene el resto
 %       de las cosas
 getRating(["rating", Num| Resto], Rating, Resto) :-
-    number_string(Rating, Num).
+    number_string(Rating, Num), validate_rating(Rating).
 
 % getGeneros(Lista, Lista generos, Resto) :- Lista de strings, Lista de generos que se obtiene, Resto
 %          de string
@@ -119,7 +119,7 @@ addAnime(Name, Rating, Generos, []) :-
 addAnime(Name, Rating,Generos, [X,Y|_]) :-
     asserta(anime(Name)), asserta(generoAnime(Name,Generos)),
     asserta(rating(Name, Rating)),
-    number_string(Num, Y), asserta(popularidad(Name, Num)),
+    number_string(Num, Y), validate_popularity(Num), asserta(popularidad(Name, Num)),
     split_string(Name, " ", "", Anime),
     append(["cuentame", "sobre", "el", "anime"], Anime, Consulta),
     specific_answer(Consulta).
@@ -131,6 +131,20 @@ specific_answer(["agregar", "el", "anime"|Cola]) :-
     getname(Cola, Name, ColaAux), getRating(ColaAux,Rating, GenerosYPopularidad),
     getGeneros(GenerosYPopularidad, Generos, Popularidad), 
     addAnime(Name, Rating, Generos, Popularidad).
+
+specific_answer(["agrega", "el", "anime"|Cola]) :-
+    getname(Cola, Name, ColaAux), getRating(ColaAux,Rating, GenerosYPopularidad),
+    getGeneros(GenerosYPopularidad, Generos, Popularidad), 
+    addAnime(Name, Rating, Generos, Popularidad).
+
+specific_answer(["agregar", "el", "anime"|_]) :-
+    write("Oops, el rating debe ser entre 1 y 5\n y la popularidad entre 1 y 10.\n"),
+    anibot("Intenta de nuevo o pide algo nuevo\n").
+
+specific_answer(["agrega", "el", "anime"|_]) :-
+    write("Oops, el rating debe ser entre 1 y 5\n y la popularidad entre 1 y 10.\n"),
+    anibot("Intenta de nuevo o pide algo nuevo\n").
+
 
 specific_answer(["bien"]) :-
     anibot("Me alegra mucho. De que quieres hablar?").
@@ -202,7 +216,7 @@ specific_answer(["cuales", "son", "los", "mas" ,"populares?"]) :-
     mayorPopularidad(Mayor),
     findall((Mayor,Anime), popularidad(Anime, Mayor), L ),
     write("\n"),
-    print_by_rating(L).
+    print_by_popularity(L).
 
 % Animes de X estrellas
 specific_answer(["cuales", "son", "los", "animes" , "del", "genero", Genre, "de", X, "estrellas?"]) :-
@@ -270,11 +284,13 @@ specific_answer(["cuentame", "sobre", "el", "anime" | Anime]) :-
     split_string(Genres_Lower, " ", "", Genreslist),
     write("Cual es su rating?"), nl,
     read(Ratingint),
-    validate_rating(Ratingint),
+    write("Cual es su popularidad?\n"),
+    read(Popularity),
+    validate_rating(Ratingint),validate_popularity(Popularity),
     asserta(anime(Animestring)),
     asserta(generoAnime(Animestring, Genreslist)),
     asserta(rating(Animestring, Ratingint)),
-    asserta(popularidad(Animestring, 1)),
+    asserta(popularidad(Animestring, Popularity)),
     string_concat("Ahora se todo sobre el anime ", Animestring, Msgaux),
     add_like(Animestring),
     anibot(Msgaux).
@@ -287,8 +303,6 @@ specific_answer(["salir"]) :-
 
 specific_answer(_) :-
     anibot("No he entendido eso.\n Dime algo en que te pueda ayudar").
-
-
 
 
 %   Funcion para determinar el orden a mostrar en los animes por genero y popularidad %
@@ -383,8 +397,15 @@ print_by_rating([]) :-
     write("No conozco ningun anime de ese genero, podrias añadir uno si quieres :D\n"),
     anibot("").
 
+print_by_popularity(Animes) :-
+    write("Son los siguientes:\n"),
+    write("Anime\t\t\t Popularity\n"),
+    print_list_tuple(Animes),
+    anibot("Excelente pregunta, que mas te gustaria saber?").
+
 print_by_rating(Animes) :-
     write("Son los siguientes:\n"),
+    write("Anime\t\t\t Rating\n"),
     print_list_tuple(Animes),
     anibot("Excelente pregunta, que mas te gustaria saber?").
 
@@ -396,9 +417,9 @@ print_list([A|B]) :-
 
 % Funcion para imprimir una lista de tuplas. Tomando el segundo elemento %
 print_list_tuple([]).
-print_list_tuple([(_,B)|Z]) :-
-  format("~w\n", B),
-  print_list_tuple(Z).
+print_list_tuple([(A,B)|Z]) :-
+    format("~w\t\t\t ~w\n", [B,A]),
+    print_list_tuple(Z).
 
 % funcion para crear una lista de tipo (anime, rating) %
 make_rating_list([], []).
@@ -504,6 +525,10 @@ validate_rating(Ratingint) :-
     Ratingint >= 1,
     Ratingint =< 5.
 
+
+validate_popularity(Popularity) :-
+    Popularity >= 1,
+    Popularity =< 10.
 
 % Funcion para eliminar un caracter de un string %
 remove_char(S,C,X) :- 
