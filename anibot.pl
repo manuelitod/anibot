@@ -74,13 +74,17 @@ getGeneros(["del", "genero",X|Xs],ListaGeneros, Resto ) :-
     X \= "popularidad", getGeneros(Xs, Lista, Resto ), genero(X),
     append( [X],Lista, ListaGeneros).
 
-
+getGeneros(["del", "genero",X|Xs],ListaGeneros, Resto ) :-
+    X \= "popularidad", getGeneros(Xs, Lista, Resto ), assert(genero(X)),
+    append( [X],Lista, ListaGeneros).
 
 getGeneros([X|Xs],ListaGeneros, Resto ) :-
     X \= "popularidad", getGeneros(Xs, Lista, Resto ), genero(X),
     append( [X],Lista, ListaGeneros).
 
 getGeneros([X], X, []) :- genero(X).
+
+getGeneros([X], X, []) :- assert(genero(X)).
 
 getGeneros([X|Y], [], [X|Y]) :- X = "popularidad".
 
