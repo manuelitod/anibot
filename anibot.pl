@@ -234,6 +234,7 @@ specific_answer(["cuentame", "sobre", "el", "anime" | Anime]) :-
     atomic_list_concat(Generos, ',', Atomgenero),
     atom_string(Atomgenero, Generostring),
     write(Generostring),
+    add_like(Animestring),
     anibot('').
 
 specific_answer(["cuentame", "sobre", "el", "anime" | Anime]) :-
@@ -254,6 +255,7 @@ specific_answer(["cuentame", "sobre", "el", "anime" | Anime]) :-
     asserta(rating(Animestring, Ratingint)),
     asserta(popularidad(Animestring, 1)),
     string_concat("Ahora se todo sobre el anime ", Animestring, Msgaux),
+    add_like(Animestring),
     anibot(Msgaux).
 
 specific_answer(["cuentame", "sobre", "el", "anime" | _]) :-
@@ -451,6 +453,31 @@ popularity_message(Popularidad, "muy conocido") :-
     Popularidad =< 9.
 
 popularity_message(_, "bastante conocido").
+
+% Funcion que lleva la cuenta de cuantas veces se pregunta por un anime %
+
+add_like(Anime) :-
+    \+ consultas(Anime, Consulta),
+    asserta(consultas(Anime,1)).
+
+add_like(Anime) :-
+    consultas(Anime, Consulta),
+    popularidad(Anime, Popularidad),
+    Consulta == 4,
+    Popularidad =< 9,
+    retract(consultas(Anime, Consulta)),
+    retract(popularidad(Anime, Popularidad)),
+    NewPopularidad is Popularidad + 1,
+    asserta(popularidad(Anime, NewPopularidad)).
+
+add_like(Anime) :-
+    consultas(Anime, Consulta),
+    Consulta < 4,
+    retract(consultas(Anime, Consulta)),
+    NewConsulta is Consulta + 1,
+    asserta(consultas(Anime, NewConsulta)).
+
+add_like(_).
 
 validate_rating(Ratingint) :-
     Ratingint >= 1,
