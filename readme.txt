@@ -81,3 +81,12 @@ haya alcanzado su maximo, se desprecia el contador de consultas.
 
 "cuentame sobre el anime X".
 
+#Agregar un anime en Oneline
+PAra agregar un anime en una sola linea de respuesta. Se debe seguir este formato
+
+"agregar anime X rating Y (de los generos/del genero) Z".
+"agregar anime X rating Y (de los generos/del genero) Z" popularidad A.
+
+Donde X es el nombre del anime, pueden ser varias palabras. Y es el rating.
+Z son los generos o genero (Ejem: shounen magia fantasia) y A es la popularidad.
+La popularidad es opcional. Despues de agregado, se muestra una consulta de ese anime.
