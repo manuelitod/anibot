@@ -9,16 +9,21 @@
 %:- use_module(library(double_quotes)).
 % Para hacernos la vida mas facil trabajemos todos los strings en minuscula %
 
-anime(X) :- member(X,["dragon ball", "naruto", "bleach", "hunterxhunter", "hamtaro", "full metal alchemist"]).
+anime(X) :- member(X,["dragon ball", "naruto", "bleach", "hunterxhunter", "hamtaro", "full metal alchemist",
+                 "kakegurui", "death note", "evangelion", "code geass"]).
 genero(X) :- member(X,["aventura", "shoujo", "shounen", "kodomo", "seinen", "josei", "ficcion",
                     "fantasia", "mecha", "sobrenatural", "magia", "gore"]).
 generoAnime("naruto",["shounen","aventura"]).
+
 generoAnime("dragon ball",["shounen"]).
 generoAnime("bleach",["shounen", "sobrenatural"]).
 generoAnime("hunterxhunter",["seinen", "aventura"]).
 generoAnime("hamtaro",["kodomo"]).
 generoAnime("full metal alchemist",["shounen", "magia"]).
-
+generoAnime("kakegurui", ["shounen"]).
+generoAnime("death note", ["shounen", "sobrenatural"]).
+generoAnime("evangelion", ["ficcion"]).
+generoAnime("code geass", ["shounen", "fantasia"]).
 %Rating 
 rating("dragon ball",3).
 rating("naruto",1).
@@ -26,7 +31,10 @@ rating("bleach",4).
 rating("hunterxhunter",5).
 rating("hamtaro",2).
 rating("full metal alchemist",4).
-
+rating("kakegurui", 3).
+rating("death note", 5).
+rating("evangelion", 5).
+rating("code geass", 3).
 %Popularidad
 popularidad("dragon ball",7).
 popularidad("naruto",5).
@@ -34,7 +42,10 @@ popularidad("bleach",8).
 popularidad("hunterxhunter",5).
 popularidad("hamtaro",10).
 popularidad("full metal alchemist", 3).
-
+popularidad("shounen", 2).
+popularidad("death note", 9).
+popularidad("evangelion",10).
+popularidad("code geass", 4).
 % base de datos de las respuestas genericas %
 respuestas_genericas("No te he entendido, preguntame algo que conozca").
 respuestas_genericas("Por favor, preguntame algo que sepa responder").
@@ -43,15 +54,18 @@ respuestas_genericas("Por favor, preguntame algo que sepa responder").
     
 
 
-%find mayor%
+% mayorPopularidad(Mayor) :- Mayor is the integer of the anime with the highest popularity.
 mayorPopularidad(Mayor) :-
     findall(Num, popularidad(_,Num), L ), sort(L, L2), reverse(L2, [Mayor|_]).
 
+% mayorRating(Mayor) :- Mayor is the integer of the anime with the highest rating.
 mayorRating(Mayor) :-
     findall(Num, rating(_,Num), L ), sort(L, L2), reverse(L2, [Mayor|_]).
 
 % base de datos para las respuestas especificas %
 
+% getname(Lista, Name, Cola):- Lista es una lista de string, Name es el nombre del anime.
+%           cola es todo el resto
 
 getname([X|Z], Name, Cola) :-
     X \= "rating", 
@@ -64,9 +78,14 @@ getname([X|Z], Name, Cola) :-
 getname([X|Z], "", [X|Z]) :-
     X = "rating".
 
+
+% getRating(List, Rating,Resto) :- Lista de strings, Rating es entero con el rating, Resto tiene el resto
+%       de las cosas
 getRating(["rating", Num| Resto], Rating, Resto) :-
     number_string(Rating, Num).
 
+% getGeneros(Lista, Lista generos, Resto) :- Lista de strings, Lista de generos que se obtiene, Resto
+%          de string
 getGeneros(["de", "los", "generos"|Xs],ListaGeneros, Resto ) :-
     getGeneros(Xs, ListaGeneros, Resto).
 
@@ -88,7 +107,7 @@ getGeneros([X], X, []) :- assert(genero(X)).
 
 getGeneros([X|Y], [], [X|Y]) :- X = "popularidad".
 
-%Sin popularidad
+% addAnime(Nombre,Rating, Lista de Generos, Popularidad):- Agrega un anime con esas cosas
 addAnime(Name, Rating, Generos, []) :-
     asserta(anime(Name)), asserta(generoAnime(Name,Generos)),
     asserta(rating(Name, Rating)),
@@ -97,9 +116,6 @@ addAnime(Name, Rating, Generos, []) :-
     append(["cuentame", "sobre", "el", "anime"], Anime, Consulta),
     specific_answer(Consulta).
      
-
-
-
 addAnime(Name, Rating,Generos, [X,Y|_]) :-
     asserta(anime(Name)), asserta(generoAnime(Name,Generos)),
     asserta(rating(Name, Rating)),
@@ -110,6 +126,7 @@ addAnime(Name, Rating,Generos, [X,Y|_]) :-
     %write(Consulta).
 
 
+%specific_answer(Lista de strings) :- accion correspondiente a la lista de strings
 specific_answer(["agregar", "el", "anime"|Cola]) :-
     getname(Cola, Name, ColaAux), getRating(ColaAux,Rating, GenerosYPopularidad),
     getGeneros(GenerosYPopularidad, Generos, Popularidad), 
