@@ -95,6 +95,7 @@ addAnime(Name, Rating, Generos, []) :-
      
 
 
+
 addAnime(Name, Rating,Generos, [X,Y|_]) :-
     asserta(anime(Name)), asserta(generoAnime(Name,Generos)),
     asserta(rating(Name, Rating)),
